@@ -18,12 +18,12 @@ function MainLayout(){
                     PetShop
                 </h2>
                 <nav>
-                    <link to="/dashboard">Dashboard</link>
-                    <link to="/pets">Pets</link>
-                    <link to="/#">Donos</link>
-                    <link to="/#">Serviços</link>
-                    <link to="/#">Tipos de Serviços</link>
-                    <link to="/#">Usuarios</link>
+                    <Link to="/dashboard">Dashboard</Link>
+                    <Link to="/pets">Pets</Link>
+                    <Link to="/owners">Donos</Link>
+                    <Link to="/#">Serviços</Link>
+                    <Link to="/#">Tipos de Serviços</Link>
+                    <Link to="/#">Usuarios</Link>
                 </nav>
             </aside>
 
