@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { OwnersService } from '../../services/resourcesService';
- 
+import '../Owners/index.css'
+
 const emptyForm = {
   name: '',
   document: '',
@@ -8,7 +9,7 @@ const emptyForm = {
   email: '',
   address: ''
 };
- 
+
 export default function OwnersPage() {
   const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,13 +18,13 @@ export default function OwnersPage() {
   const [editingOwner, setEditingOwner] = useState(null);
   const [detailOwner, setDetailOwner] = useState(null);
   const [message, setMessage] = useState('');
- 
+
   async function loadOwners() {
     try {
       setLoading(true);
- 
+
       const data = await OwnersService.list();
- 
+
       setOwners(data);
     } catch (error) {
       setMessage('Erro ao carregar donos.');
@@ -31,28 +32,28 @@ export default function OwnersPage() {
       setLoading(false);
     }
   }
- 
+
   useEffect(() => {
     loadOwners(owners);
   }, []);
- 
+
   function handleChange(event) {
     const { name, value } = event.target;
- 
+
     setForm({
       ...form,
       [name]: value
     });
   }
- 
+
   function clearForm() {
     setForm(emptyForm);
     setEditingOwner(null);
   }
- 
+
   async function handleSubmit(event) {
     event.preventDefault();
- 
+
     if (
       !form.name ||
       !form.document ||
@@ -63,25 +64,25 @@ export default function OwnersPage() {
       setMessage('Preencha todos os campos.');
       return;
     }
- 
+
     try {
       if (editingOwner) {
         await OwnersService.update(editingOwner.id, form);
- 
+
         setMessage('Dono atualizado com sucesso.');
       } else {
         await OwnersService.create(form);
- 
+
         setMessage('Dono cadastrado com sucesso.');
       }
- 
+
       clearForm();
       loadOwners();
     } catch (error) {
       setMessage('Erro ao salvar dono.');
     }
   }
- 
+
   function handleEdit(owner) {
     setEditingOwner(owner);
     setForm({
@@ -92,38 +93,38 @@ export default function OwnersPage() {
       address: owner.address || ''
     });
   }
- 
+
   async function handleDetails(owner) {
     try {
       const data = await OwnersService.getById(owner.id);
- 
+
       setDetailOwner(data);
     } catch (error) {
       setMessage('Erro ao carregar detalhes.');
     }
   }
- 
+
   async function handleDelete(owner) {
     const confirmDelete = window.confirm(
       `Deseja excluir ${owner.name}?`
     );
- 
+
     if (!confirmDelete) return;
- 
+
     try {
       await OwnersService.remove(owner.id);
- 
+
       setMessage('Dono excluído com sucesso.');
- 
+
       loadOwners();
     } catch (error) {
       setMessage('Erro ao excluir dono.');
     }
   }
- 
+
   const filteredOwners = owners.filter((owner) => {
     const term = search.toLowerCase();
- 
+
     return (
       owner.name?.toLowerCase().includes(term) ||
       owner.document?.toLowerCase().includes(term) ||
@@ -131,104 +132,105 @@ export default function OwnersPage() {
       owner.email?.toLowerCase().includes(term)
     );
   });
- 
+
   if (loading) {
     return <p>Carregando donos...</p>;
   }
- 
+
   return (
-<div>
-<h1>Donos</h1>
- 
-      <p>Gerencie os responsáveis pelos pets cadastrados.</p>
- 
-      {message && <p>{message}</p>}
- 
+    <div>
+      <div className='titulo'>
+        <h1 className='titulo'>Donos</h1>
+
+        <p>Gerencie os responsáveis pelos pets cadastrados.</p>
+
+        {message && <p>{message}</p>}
+      </div>
       <hr />
- 
+
       <h2>
         {editingOwner ? 'Editar dono' : 'Novo dono'}
-</h2>
- 
+      </h2>
+
       <form onSubmit={handleSubmit}>
-<div>
-<label>Nome</label>
-<br />
- 
+        <div>
+          <label>Nome</label>
+          <br />
+
           <input
             name="name"
             value={form.name}
             onChange={handleChange}
           />
-</div>
- 
+        </div>
+
         <div>
-<label>Documento</label>
-<br />
- 
+          <label>Documento</label>
+          <br />
+
           <input
             name="document"
             value={form.document}
             onChange={handleChange}
           />
-</div>
- 
+        </div>
+
         <div>
-<label>Telefone</label>
-<br />
- 
+          <label>Telefone</label>
+          <br />
+
           <input
             name="phone"
             value={form.phone}
             onChange={handleChange}
           />
-</div>
- 
+        </div>
+
         <div>
-<label>Email</label>
-<br />
- 
+          <label>Email</label>
+          <br />
+
           <input
             type="email"
             name="email"
             value={form.email}
             onChange={handleChange}
           />
-</div>
- 
+        </div>
+
         <div>
-<label>Endereço</label>
-<br />
- 
+          <label>Endereço</label>
+          <br />
+
           <textarea
             name="address"
             value={form.address}
             onChange={handleChange}
           />
-</div>
- 
+        </div>
+
         <br />
- 
+
         <button type="submit">
           {editingOwner
             ? 'Salvar alterações'
             : 'Cadastrar dono'}
-</button>
- 
+        </button>
+
         {editingOwner && (
-<button
+          <button
             type="button"
             onClick={clearForm}
->
+          >
             Cancelar
-</button>
+          </button>
         )}
-</form>
- 
+      </form>
+
       <hr />
- 
+
       <h2>Lista de donos</h2>
- 
+
       <input
         placeholder="Buscar por nome, documento, telefone ou email"
         value={search}
@@ -236,117 +238,117 @@ export default function OwnersPage() {
           setSearch(event.target.value)
         }
       />
- 
+
       <br />
-<br />
- 
+      <br />
+
       {filteredOwners.length === 0 ? (
-<p>Nenhum dono encontrado.</p>
+        <p>Nenhum dono encontrado.</p>
       ) : (
-<table border="1" cellPadding="5">
-<thead>
-<tr>
-<th>Nome</th>
-<th>Documento</th>
-<th>Telefone</th>
-<th>Email</th>
-<th>Ações</th>
-</tr>
-</thead>
- 
+        <table border="1" cellPadding="5">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Documento</th>
+              <th>Telefone</th>
+              <th>Email</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
           <tbody>
             {filteredOwners.map((owner) => (
-<tr key={owner.id}>
-<td>{owner.name}</td>
-<td>{owner.document}</td>
-<td>{owner.phone}</td>
-<td>{owner.email}</td>
- 
+              <tr key={owner.id}>
+                <td>{owner.name}</td>
+                <td>{owner.document}</td>
+                <td>{owner.phone}</td>
+                <td>{owner.email}</td>
+
                 <td>
-<button
+                  <button
                     onClick={() =>
                       handleDetails(owner)
                     }
->
+                  >
                     Detalhes
-</button>
- 
+                  </button>
+
                   <button
                     onClick={() =>
                       handleEdit(owner)
                     }
->
+                  >
                     Editar
-</button>
- 
+                  </button>
+
                   <button
                     onClick={() =>
                       handleDelete(owner)
                     }
->
+                  >
                     Excluir
-</button>
-</td>
-</tr>
+                  </button>
+                </td>
+              </tr>
             ))}
-</tbody>
-</table>
+          </tbody>
+        </table>
       )}
- 
+
       {detailOwner && (
-<div>
-<hr />
- 
+        <div>
+          <hr />
+
           <h2>Detalhes do dono</h2>
- 
+
           <p>
-<strong>Nome:</strong>{' '}
+            <strong>Nome:</strong>{' '}
             {detailOwner.name}
-</p>
- 
+          </p>
+
           <p>
-<strong>Documento:</strong>{' '}
+            <strong>Documento:</strong>{' '}
             {detailOwner.document}
-</p>
- 
+          </p>
+
           <p>
-<strong>Telefone:</strong>{' '}
+            <strong>Telefone:</strong>{' '}
             {detailOwner.phone}
-</p>
- 
+          </p>
+
           <p>
-<strong>Email:</strong>{' '}
+            <strong>Email:</strong>{' '}
             {detailOwner.email}
-</p>
- 
+          </p>
+
           <p>
-<strong>Endereço:</strong>{' '}
+            <strong>Endereço:</strong>{' '}
             {detailOwner.address}
-</p>
- 
+          </p>
+
           <h3>Pets vinculados</h3>
- 
+
           {detailOwner.pets?.length > 0 ? (
-<ul>
+            <ul>
               {detailOwner.pets.map((pet) => (
-<li key={pet.id}>
+                <li key={pet.id}>
                   {pet.name}
-</li>
+                </li>
               ))}
-</ul>
+            </ul>
           ) : (
-<p>Nenhum pet vinculado.</p>
+            <p>Nenhum pet vinculado.</p>
           )}
- 
+
           <button
             onClick={() =>
               setDetailOwner(null)
             }
->
+          >
             Fechar detalhes
-</button>
-</div>
+          </button>
+        </div>
       )}
-</div>
+    </div>
   );
 }

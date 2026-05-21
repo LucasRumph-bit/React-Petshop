@@ -23,7 +23,15 @@ class OwnerController {
   }
 
   async delete(req, res) {
-    await ownerService.delete(req.params.id);
+    const { id } = req.params;
+    const owner = await owner.findByPk(id);
+
+    if (!owner) {
+      return res.status(404).json();
+    }
+
+    await owner.delete(req.params.id);
+    
     return sendSuccess(res, { message: 'Dono removido com sucesso.' });
   }
 }

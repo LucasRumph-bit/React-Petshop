@@ -1,311 +1,353 @@
-import { useEffect, useState } from "react";
-import { PetsService, OwnersService } from "../../services/resourcesService";
-
+import { useEffect, useState } from 'react';
+import { OwnersService } from '../../services/resourcesService';
+ 
 const emptyForm = {
-    name: "",
-    species: "",
-    breed: "",
-    size: 'small',
-    age: '',
-    weight: '',
-    notes: '',
-    ownerId: '',
+  name: '',
+  document: '',
+  phone: '',
+  email: '',
+  address: ''
 };
-
-export default function PetsPage() {
-    const [pets, setPets] = useState([]);
-    const [owners, setOwners] = useState([]);
-    const [loading, setloading] = useState(true);
-    const [search, setSearch] = useState('');
-    const [form, setForm] = useState(emptyForm);
-    const [editingPet, setEditingPet] = useState(null);
-    const [detailPet, setDetailPet] = useState(null);
-    const [message, setMessage] = useState('');
-
-
-async function loadData() {
+ 
+export default function OwnersPage() {
+  const [owners, setOwners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [form, setForm] = useState(emptyForm);
+  const [editingOwner, setEditingOwner] = useState(null);
+  const [detailOwner, setDetailOwner] = useState(null);
+  const [message, setMessage] = useState('');
+ 
+  async function loadOwners() {
     try {
-        setloading(true);
-
-        const petsData = await PetsService.list();
-        const ownersData = await OwnersService.list();
-
-        setPets(petsData);
-        setOwners(ownersData);
+      setLoading(true);
+ 
+      const data = await ownersService.list();
+ 
+      setOwners(data);
     } catch (error) {
-        console.error('Erro ao carregar dados:',);
+      setMessage('Erro ao carregar donos.');
     } finally {
-        setloading(false);
+      setLoading(false);
     }
-}
-
-useEffect(() => {
-    console.log("aqui")
-    loadData();
-    console.log(pets, owners)
-}, []);
-
-function handleInputChange(e) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-}
-
-function getSizeText(size) {
-    if (size === 'small') return 'Pequeno';
-    if (size === 'medium') return 'Médio';
-    if (size === 'large') return 'Grande';
-    return size;
-}
-
-function formatDate(date) {
-    if (!date) return '';
-
-    return new Date(date).toLocaleDateString('pt-BR');
-}
-
-function formatMoney(value) {
-    if (!value) return 'R$ 0,00';
-
-    return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function getStatusText(status) {
-    if (status === 'scheuled') return 'Agendado';
-    if (status === 'in_progress') return 'Em andamento';
-    if (status === 'completed') return 'Concluído';
-    if (status === 'canceled') return 'Cancelado';
-    return status;
-}
-
-async function handleSubmit(e) {
-    e.preventDefault();
-
-    if (
-        !form.name ||
-        !form.species ||
-        !form.breed ||
-        !form.ownerId ||
-        !form.age ||
-        !form.weight
-    ) {
-        setMessage('Preencha todos os campos obrigatórios');
-        return;
-    }
-
-    const playload = {
-        name: form.name,
-        species: form.species,
-        breed: form.breed,
-        size: form.size,
-        age: Number(form.age),
-        weight: Number(form.weight),
-        notes: form.notes,
-        ownerId: Number(form.ownerId),
-    };
-
-    try {
-        if (editingPet) {
-            await PetsService.update(editingPet.id, playload);
-            setMessage('Pet atualizado com sucesso');
-        } else {
-            await PetsService.create(playload);
-            setMessage('Pet criado com sucesso');
-        }
-
-        clearForm();
-        loadData();
-    } catch (error) {
-        console.error('Erro ao salvar pet:', error);
-        setMessage('Erro ao salvar pet');
-    }
-}
-
-function handleEdit(pet) {
-    setEditingPet(pet);
+  }
+ 
+  useEffect(() => {
+    loadOwners();
+  }, []);
+ 
+  function handleChange(event) {
+    const { name, value } = event.target;
+ 
     setForm({
-        name: pet.name || '',
-        species: pet.species || '',
-        breed: pet.breed || '',
-        size: pet.size || 'small',
-        age: pet.age || '',
-        weight: pet.weight || '',
-        notes: pet.notes || '',
-        ownerId: pet.ownerId || '',
+      ...form,
+      [name]: value
     });
-}
-
-async function handleDetails(pet) {
-    try {
-        const data = await PetsService.getById(pet.id);
-        setDetailPet(data);
-    } catch (error) {
-        console.error('Erro ao carregar detalhes do pet:');
+  }
+ 
+  function clearForm() {
+    setForm(emptyForm);
+    setEditingOwner(null);
+  }
+ 
+  async function handleSubmit(event) {
+    event.preventDefault();
+ 
+    if (
+      !form.name ||
+      !form.document ||
+      !form.phone ||
+      !form.email ||
+      !form.address
+    ) {
+      setMessage('Preencha todos os campos.');
+      return;
     }
-}
-
-async function handleDelete(pet) {
-    const confirm = window.confirm(
-        'Deseja excluir ${pet.name}?'
-    )
-
-    if (!confirmDelete) return;
-
+ 
     try {
-        await PetsService.delete(pet.id);
-        setMessage('Pet excluído com sucesso');
-        loadData();
+      if (editingOwner) {
+        await ownersService.update(editingOwner.id, form);
+ 
+        setMessage('Dono atualizado com sucesso.');
+      } else {
+        await ownersService.create(form);
+ 
+        setMessage('Dono cadastrado com sucesso.');
+      }
+ 
+      clearForm();
+      loadOwners();
     } catch (error) {
-        console.error('Erro ao excluir pet:', error);
-        setMessage('Erro ao excluir pet');
+      setMessage('Erro ao salvar dono.');
     }
-}
-
-const filteredPets = pets.filter((pet) => {
-    const term = search.toLowerCase();
-    return (
-        pet.name.toLowerCase().includes(term) ||
-        pet.species.toLowerCase().includes(term) ||
-        pet.breed.toLowerCase().includes(term) ||
-        pet.ownerId.toString().includes(term)
+  }
+ 
+  function handleEdit(owner) {
+    setEditingOwner(owner);
+ 
+    setForm({
+      name: owner.name || '',
+      document: owner.document || '',
+      phone: owner.phone || '',
+      email: owner.email || '',
+      address: owner.address || ''
+    });
+  }
+ 
+  async function handleDetails(owner) {
+    try {
+      const data = await ownersService.getById(owner.id);
+ 
+      setDetailOwner(data);
+    } catch (error) {
+      setMessage('Erro ao carregar detalhes.');
+    }
+  }
+ 
+  async function handleDelete(owner) {
+    const confirmDelete = window.confirm(
+      `Deseja excluir ${owner.name}?`
     );
-});
-
-if (loading) {
-    return <p>Carregando...</p>;
-}
-
-return (
-    <div>
-        <h1>Pets</h1>
-
-        <p>Cadastre e acompanhe os animais atendidos pelo petshop</p>
-
-        {message && <p>{message}</p>}
-
-        <hr />
-
-        <h2>{editingPet ? 'Editar Pet' : 'Novo pet'}</h2>
-
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label>Nome</label>
-                <br />
-                <input
-                    type="text"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                />
-            </div>
-
-            <div>
-                <label>Espécie*</label>
-                <br />
-                <input
-                    type="text"
-                    name="species"
-                    value={form.species}
-                    onChange={handleChange}
-                />
-            </div>
-
-            <div>
-                <label>Raça*</label>
-                <br />
-                <input
-                    type="text"
-                    name="breed"
-                    value={form.breed}
-                    onChange={handleChange}
-                />
-            </div>
-        </form>
-
-        <select
-            name="ownerId"
-            value={form.ownerId}
+ 
+    if (!confirmDelete) return;
+ 
+    try {
+      await ownersService.remove(owner.id);
+ 
+      setMessage('Dono excluído com sucesso.');
+ 
+      loadOwners();
+    } catch (error) {
+      setMessage('Erro ao excluir dono.');
+    }
+  }
+ 
+  const filteredOwners = owners.filter((owner) => {
+    const term = search.toLowerCase();
+ 
+    return (
+      owner.name?.toLowerCase().includes(term) ||
+      owner.document?.toLowerCase().includes(term) ||
+      owner.phone?.toLowerCase().includes(term) ||
+      owner.email?.toLowerCase().includes(term)
+    );
+  });
+ 
+  if (loading) {
+    return <p>Carregando donos...</p>;
+  }
+ 
+  return (
+<div>
+<h1>Donos</h1>
+ 
+      <p>Gerencie os responsáveis pelos pets cadastrados.</p>
+ 
+      {message && <p>{message}</p>}
+ 
+      <hr />
+ 
+      <h2>
+        {editingOwner ? 'Editar dono' : 'Novo dono'}
+</h2>
+ 
+      <form onSubmit={handleSubmit}>
+<div>
+<label>Nome</label>
+<br />
+ 
+          <input
+            name="name"
+            value={form.name}
             onChange={handleChange}
-        >
-            <option value="">Selecione</option>
-            {owners.map((owner) => (
-                <option key={owner.id} value={owner.id}>
-                    {owner.name}
-                </option>
+          />
+</div>
+ 
+        <div>
+<label>Documento</label>
+<br />
+ 
+          <input
+            name="document"
+            value={form.document}
+            onChange={handleChange}
+          />
+</div>
+ 
+        <div>
+<label>Telefone</label>
+<br />
+ 
+          <input
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+          />
+</div>
+ 
+        <div>
+<label>Email</label>
+<br />
+ 
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+          />
+</div>
+ 
+        <div>
+<label>Endereço</label>
+<br />
+ 
+          <textarea
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+          />
+</div>
+ 
+        <br />
+ 
+        <button type="submit">
+          {editingOwner
+            ? 'Salvar alterações'
+            : 'Cadastrar dono'}
+</button>
+ 
+        {editingOwner && (
+<button
+            type="button"
+            onClick={clearForm}
+>
+            Cancelar
+</button>
+        )}
+</form>
+ 
+      <hr />
+ 
+      <h2>Lista de donos</h2>
+ 
+      <input
+        placeholder="Buscar por nome, documento, telefone ou email"
+        value={search}
+        onChange={(event) =>
+          setSearch(event.target.value)
+        }
+      />
+ 
+      <br />
+<br />
+ 
+      {filteredOwners.length === 0 ? (
+<p>Nenhum dono encontrado.</p>
+      ) : (
+<table border="1" cellPadding="5">
+<thead>
+<tr>
+<th>Nome</th>
+<th>Documento</th>
+<th>Telefone</th>
+<th>Email</th>
+<th>Ações</th>
+</tr>
+</thead>
+ 
+          <tbody>
+            {filteredOwners.map((owner) => (
+<tr key={owner.id}>
+<td>{owner.name}</td>
+<td>{owner.document}</td>
+<td>{owner.phone}</td>
+<td>{owner.email}</td>
+ 
+                <td>
+<button
+                    onClick={() =>
+                      handleDetails(owner)
+                    }
+>
+                    Detalhes
+</button>
+ 
+                  <button
+                    onClick={() =>
+                      handleEdit(owner)
+                    }
+>
+                    Editar
+</button>
+ 
+                  <button
+                    onClick={() =>
+                      handleDelete(owner)
+                    }
+>
+                    Excluir
+</button>
+</td>
+</tr>
             ))}
-        </select>
-
-        <input
-            placeholder="Buscar por nome, espécie, raca ou dono"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-        />
-
-        {filteredPets.length === 0 ? (
-            <p>Nenhum pet encontrado</p>
-        ) : (
-            <table border={1} cellPadding={5}>
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Espécie</th>
-                        <th>Raça</th>
-                        <th>Porte</th>
-                        <th>Dono</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {filteredPets.map((pet) => (
-                        <tr key={pet.id}>
-                            <td>{pet.name}</td>
-                            <td>{pet.species}</td>
-                            <td>{pet.breed}</td>
-                            <td>{getSizeText(pet.size)}</td>
-                            <td>{pet.owner?.name || '-'}</td>
-                            <td>
-                                <button onClick={() => handleDetails(pet)}>Detalhes</button>
-                                <button onClick={() => handleEdit(pet)}>Editar</button>
-                                <button onClick={() => handleDelete(pet)}>Excluir</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        )}
-
-        {detailPet && (
-            <div>
-                <h2>Detalhes de pet</h2>
-
-                <p><strong>Nome:</strong> {detailPet.name}</p>
-                <p><strong>Dono:</strong> {detailPet.owner?.name || '-'}</p>
-                <p><strong>Espécie:</strong> {detailPet.species}</p>
-                <p><strong>Raça:</strong> {detailPet.breed}</p>
-                <p><strong>Porte:</strong> {getSizeText(detailPet.size)}</p>
-                <p><strong>Peso:</strong> {detailPet.weight} kg</p>
-                <p><strong>Observações:</strong> {detailPet.observations || "Sem observações"}</p>
-
-                <h3>Historico recente</h3>
-
-                {detailPet.services?.length > 0 ? (
-                    <ul>
-                        {detailPet.services.slice(0, 4).map((service) => (
-                            <li key={service.id}>
-                                {service.serviceType?.name || 'Servico'} - {' '}
-                                {formatDate(service.servicedate)} - {' '}
-                                {formatMoney(service.chargedAmount)} - {''}
-                                {getStatusText(service.status)}
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>Nenhum serviço realizado ainda</p>
-                )}
-
-                <button onClick={() => setDetailPet(null)}>Fechar</button>
-            </div>
-        )}
-    </div>
-);
+</tbody>
+</table>
+      )}
+ 
+      {detailOwner && (
+<div>
+<hr />
+ 
+          <h2>Detalhes do dono</h2>
+ 
+          <p>
+<strong>Nome:</strong>{' '}
+            {detailOwner.name}
+</p>
+ 
+          <p>
+<strong>Documento:</strong>{' '}
+            {detailOwner.document}
+</p>
+ 
+          <p>
+<strong>Telefone:</strong>{' '}
+            {detailOwner.phone}
+</p>
+ 
+          <p>
+<strong>Email:</strong>{' '}
+            {detailOwner.email}
+</p>
+ 
+          <p>
+<strong>Endereço:</strong>{' '}
+            {detailOwner.address}
+</p>
+ 
+          <h3>Pets vinculados</h3>
+ 
+          {detailOwner.pets?.length > 0 ? (
+<ul>
+              {detailOwner.pets.map((pet) => (
+<li key={pet.id}>
+                  {pet.name}
+</li>
+              ))}
+</ul>
+          ) : (
+<p>Nenhum pet vinculado.</p>
+          )}
+ 
+          <button
+            onClick={() =>
+              setDetailOwner(null)
+            }
+>
+            Fechar detalhes
+</button>
+</div>
+      )}
+</div>
+  );
 }

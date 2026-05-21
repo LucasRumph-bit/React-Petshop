@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react'
 import { AuthContext } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import '../Login/index.css'
 
 export default function Login(){
     const { login } = useContext(AuthContext)
@@ -30,9 +31,12 @@ export default function Login(){
     }
 
     return (
-        <div>
+        <div className='telalogin'>
             <form onSubmit={handleSubmit}>
+                <div className='boxlogin'> 
+                    <div className='login'>
                 <h1>Login</h1>
+                    </div>
                 <input type='email'
                     placeholder='E-mail'
                     value={email}
@@ -42,10 +46,11 @@ export default function Login(){
                     value={password}
                     onChange={(e)=>setPassword(e.target.value)} />
 
-                {error && <p>{error}</p>}
+                {error && <p className='Erro'>{error}</p>}
                 <button type='submit' disabled={loading}>
                     {loading ? 'Entrando...' : 'Entrar'}
                 </button>
+                </div> 
             </form>
         </div>
     )

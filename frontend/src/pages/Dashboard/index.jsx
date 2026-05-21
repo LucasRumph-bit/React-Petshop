@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import MainLayout from '../../layouts/MainLayout'
+import '../Dashboard/index.css'
 
 function Dashboard(){
     return(
         <>
-            <h1>DashBoard</h1>
             <MainLayout/>
         </>
     )
